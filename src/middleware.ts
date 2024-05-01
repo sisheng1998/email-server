@@ -9,20 +9,17 @@ export const auth =
       return c.json(
         {
           success: false,
-          message: 'Missing AUTH_TOKEN environment variable.',
+          message: 'Missing AUTH_TOKEN environment variable',
         },
         500
       )
 
-    if (!token)
+    if (!token || token !== c.env.AUTH_TOKEN)
       return c.json(
-        { success: false, message: 'Missing authorization token.' },
-        401
-      )
-
-    if (token !== c.env.AUTH_TOKEN)
-      return c.json(
-        { success: false, message: 'Invalid authorization token.' },
+        {
+          success: false,
+          message: `${!token ? 'Missing' : 'Invalid'} authorization token`,
+        },
         401
       )
 
