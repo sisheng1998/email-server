@@ -3,18 +3,23 @@ export type Bindings = {
   DKIM_PRIVATE_KEY: string
 }
 
-export type Contact = { email: string; name?: string }
+export type MCContact = { email: string; name?: string }
 
-export type Content = { type: string; value: string }
+export type MCContent = { type: string; value: string }
 
-export type Personalization = { to: Contact[] }
+export type MCPersonalization = {
+  to: MCContact[]
+  dkim_domain: string
+  dkim_selector: string
+  dkim_private_key: string
+}
 
-export type Email = {
-  personalizations: Personalization[]
-  from: Contact
-  reply_to?: Contact
-  cc?: Contact[]
-  bcc?: Contact[]
+export type MCEmail = {
+  personalizations: MCPersonalization[]
+  from: MCContact
+  reply_to?: MCContact
+  cc?: MCContact[]
+  bcc?: MCContact[]
   subject: string
-  content: Content[]
+  content: MCContent[]
 }
