@@ -16,7 +16,7 @@ export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
       to,
       dkim_domain: from.email.split('@')[1],
       dkim_selector: 'mailchannels',
-      dkim_private_key: env.DKIM_PRIVATE_KEY || '',
+      dkim_private_key: env.DKIM_PRIVATE_KEY,
     },
   ]
 
