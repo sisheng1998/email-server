@@ -13,16 +13,14 @@ export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
 
   const personalizations: MCPersonalization[] = [
     {
-      to,
       dkim_domain: from.email.split('@')[1],
       dkim_selector: 'mailchannels',
       dkim_private_key: env.DKIM_PRIVATE_KEY,
+      to,
     },
   ]
 
   let reply_to: MCContact | undefined
-  let bcc: MCContact[] | undefined
-  let cc: MCContact[] | undefined
 
   if (email.replyTo) {
     const replyToContacts = getMCContacts(email.replyTo)
@@ -34,11 +32,11 @@ export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
   }
 
   if (email.cc) {
-    cc = getMCContacts(email.cc)
+    personalizations[0].cc = getMCContacts(email.cc)
   }
 
   if (email.bcc) {
-    bcc = getMCContacts(email.bcc)
+    personalizations[0].bcc = getMCContacts(email.bcc)
   }
 
   const subject = email.subject
@@ -60,8 +58,6 @@ export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
   return {
     personalizations,
     from,
-    cc,
-    bcc,
     reply_to,
     subject,
     content,
