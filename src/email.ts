@@ -6,15 +6,20 @@ import { getMCEmail } from './utils'
 export const sendEmail = async (email: Email, env: Bindings) => {
   const mcEmail = getMCEmail(email, env)
 
-  const response = await fetch('https://api.mailchannels.net/tx/v1/send', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(mcEmail),
-  })
+  const response = await fetch(
+    `https://api.mailchannels.net/tx/v1/send${
+      email.dryRun ? '?dry-run=true' : ''
+    }`,
+    {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(mcEmail),
+    }
+  )
 
-  const body = await (response.ok ? response.json() : response.text())
+  const body = await response.text()
 
   return {
     success: response.ok,
