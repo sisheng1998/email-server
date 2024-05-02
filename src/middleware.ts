@@ -1,7 +1,8 @@
 import { Context, MiddlewareHandler } from 'hono'
 import { Bindings } from './types'
+import emailSchema from './zod'
 
-export const auth =
+export const authMiddleware =
   (): MiddlewareHandler => async (c: Context<{ Bindings: Bindings }>, next) => {
     const token = c.req.header('Authorization')
 
@@ -21,6 +22,24 @@ export const auth =
           message: `${!token ? 'Missing' : 'Invalid'} authorization token`,
         },
         401
+      )
+
+    await next()
+  }
+
+export const inputMiddleware =
+  (): MiddlewareHandler => async (c: Context<{ Bindings: Bindings }>, next) => {
+    const email = await c.req.json()
+    const result = emailSchema.safeParse(email)
+
+    if (!result.success)
+      return c.json(
+        {
+          success: false,
+          message: 'Invalid input',
+          issues: result.error.flatten(),
+        },
+        400
       )
 
     await next()

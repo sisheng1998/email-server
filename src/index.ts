@@ -1,8 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { auth } from './middleware'
+import { authMiddleware, inputMiddleware } from './middleware'
 import { Bindings } from './types'
-import emailSchema from './zod'
 import { sendEmail } from './email'
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -11,19 +10,8 @@ app.use('*', cors())
 
 app.get('/', (c) => c.redirect('https://sisheng.my', 302))
 
-app.post('/send', auth(), async (c) => {
+app.post('/send', authMiddleware(), inputMiddleware(), async (c) => {
   const email = await c.req.json()
-  const result = emailSchema.safeParse(email)
-
-  if (!result.success)
-    return c.json(
-      {
-        success: false,
-        message: 'Invalid input',
-        issues: result.error.flatten(),
-      },
-      400
-    )
 
   try {
     const response = await sendEmail(email, c.env)
