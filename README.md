@@ -189,6 +189,8 @@ When the `dryRun` is present and set to `true`, the email will not be sent.
 
 ## Development
 
+Copy `.dev.vars.example`, rename the new file to `.dev.vars`, and fill in the variables from [Cloudflare Worker](#cloudflare-worker)
+
 Start a local server with `npm run dev`, the server will run at `http://localhost:8787`.
 
 Note: Email will not be sent with local server as MailChannels only accept the request that came from Cloudflare workers.
