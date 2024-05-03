@@ -16,7 +16,9 @@ export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
       dkim_domain: from.email.split('@')[1],
       dkim_selector: 'mailchannels',
       dkim_private_key: env.DKIM_PRIVATE_KEY,
+      from,
       to,
+      subject: email.subject,
     },
   ]
 
@@ -29,6 +31,8 @@ export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
       replyToContacts.length > 0
         ? replyToContacts[0]
         : { email: '', name: undefined }
+
+    personalizations[0].reply_to = reply_to
   }
 
   if (email.cc) {

@@ -11,9 +11,12 @@ export type MCPersonalization = {
   dkim_domain: string
   dkim_selector: string
   dkim_private_key: string
+  from: MCContact
   to: MCContact[]
+  reply_to?: MCContact
   cc?: MCContact[]
   bcc?: MCContact[]
+  subject: string
 }
 
 export type MCEmail = {
