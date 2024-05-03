@@ -19,7 +19,7 @@ export const sendEmail = async (email: Email, env: Bindings) => {
     }
   )
 
-  const body = await response.text()
+  const body = await (response.ok ? response.json() : response.text())
 
   return {
     success: response.ok,
