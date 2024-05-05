@@ -11,7 +11,7 @@ Add these to `Repository secrets` under `Settings` > `Secrets and variables` > `
 - `CLOUDFLARE_API_TOKEN` -> Cloudflare API token which has permissions for Cloudflare Worker
 - `CLOUDFLARE_ACCOUNT_ID` -> Your Cloudflare Account ID
 
-Once these are added, the `deploy-to-cloudflare` Github action workflow will run and deploy the email server on Cloudflare Worker automatically when the `main` branch updated.
+Once these are added, the `deploy` Github action workflow will run and deploy the email server on Cloudflare Worker automatically when the `main` branch updated.
 
 ### Cloudflare Worker
 
@@ -193,7 +193,7 @@ Copy `.dev.vars.example`, rename the new file to `.dev.vars`, and fill in the va
 
 Start a local server with `npm run dev`, the server will run at `http://localhost:8787`.
 
-Note: Email will not be sent with local server as MailChannels only accept the request that came from Cloudflare workers.
+Note: Email will not be sent with local server as MailChannels only accept the request that sent from Cloudflare workers.
 
 ## Technology Stack
 
