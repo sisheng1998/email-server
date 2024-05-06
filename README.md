@@ -15,10 +15,10 @@ Once these are added, the `deploy` Github action workflow will run and deploy th
 
 ### Cloudflare Worker
 
-- `AUTH_TOKEN` - Random token that will be used in the "Authorization" header to make authenticated calls to your email server.
+- `API_TOKEN` - Random token that will be used in the "Authorization" header to make authenticated calls to your email server.
 - `DKIM_PRIVATE_KEY` - DKIM private key generated in [DKIM Record](#dkim-record)
 
-For `AUTH_TOKEN`, use `head -c 20 /dev/urandom | base64` command in Linux/Mac to generate random tokens quickly.
+For `API_TOKEN`, use `openssl rand -base64 32` command in Linux/MacOS to generate random tokens quickly.
 
 ## Setup DNS Records
 
@@ -74,7 +74,7 @@ Update [DKIM_PRIVATE_KEY](#cloudflare-worker) with the content of the `priv_key.
 
 Send emails by making a `POST` request to the worker on the `/send` endpoint with the following parameters:
 
-You need to pass an `Authorization` header with the [authorization token](#cloudflare-worker). Like the following: `Authorization: AUTH_TOKEN`
+You need to pass an `Authorization` header with the [authorization token](#cloudflare-worker). Like the following: `Authorization: Bearer {API_TOKEN}`
 
 ### Basic Email
 
