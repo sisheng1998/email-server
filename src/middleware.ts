@@ -4,18 +4,18 @@ import emailSchema from './zod'
 
 export const authMiddleware =
   (): MiddlewareHandler => async (c: Context<{ Bindings: Bindings }>, next) => {
-    const token = c.req.header('Authorization')
+    const token = c.req.header('Authorization')?.split('Bearer ')[1]
 
-    if (!c.env.AUTH_TOKEN || c.env.AUTH_TOKEN.length === 0)
+    if (!c.env.API_TOKEN || c.env.API_TOKEN.length === 0)
       return c.json(
         {
           success: false,
-          message: 'Missing AUTH_TOKEN environment variable',
+          message: 'Missing API_TOKEN environment variable',
         },
         500
       )
 
-    if (!token || token !== c.env.AUTH_TOKEN)
+    if (!token || token !== c.env.API_TOKEN)
       return c.json(
         {
           success: false,

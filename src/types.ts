@@ -1,5 +1,5 @@
 export type Bindings = {
-  AUTH_TOKEN: string
+  API_TOKEN: string
   DKIM_PRIVATE_KEY: string
 }
 
