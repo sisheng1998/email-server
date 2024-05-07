@@ -26,9 +26,9 @@ For `API_TOKEN`, use `openssl rand -base64 32` command in Linux/MacOS to generat
 
 Add `TXT` record to your domain with the following values:
 
-| Name | Value                                           |
-| ---- | ----------------------------------------------- |
-| @    | v=spf1 a mx include:relay.mailchannels.net ~all |
+| Type | Name | Value                                           |
+| ---- | ---- | ----------------------------------------------- |
+| TXT  | @    | v=spf1 a mx include:relay.mailchannels.net ~all |
 
 If you already have a SPF record added for your domain, note that you cannot add another `TXT` record for spf. In such cases merge the existing SPF record with mailchannels.
 
@@ -40,9 +40,9 @@ So the new record value will be `v=spf1 include:zoho.in include:relay.mailchanne
 
 Add `TXT` record to your domain with the following values:
 
-| Name           | Value                        |
-| -------------- | ---------------------------- |
-| \_mailchannels | v=mc1 cfid=xxxxx.workers.dev |
+| Type | Name           | Value                        |
+| ---- | -------------- | ---------------------------- |
+| TXT  | \_mailchannels | v=mc1 cfid=xxxxx.workers.dev |
 
 Replace `xxxxx` with your workers subdomain which you can find on the `Workers & Pages` section of Cloudflare.
 
@@ -51,24 +51,24 @@ Replace `xxxxx` with your workers subdomain which you can find on the `Workers &
 Generate private key as PEM file and base64 encoded txt file:
 
 ```sh
-openssl genrsa 2048 | tee priv_key.pem | openssl rsa -outform der | openssl base64 -A > priv_key.txt
+mkdir -p secrets && openssl genrsa 2048 | tee secrets/private_key.pem | openssl rsa -outform der | openssl base64 -A > secrets/private_key.txt
 ```
 
 Generate public key for DNS record:
 
 ```sh
-echo -n "v=DKIM1;p=" > pub_key_record.txt && openssl rsa -in priv_key.pem -pubout -outform der | openssl base64 -A >> pub_key_record.txt
+echo -n "v=DKIM1;p=" > secrets/public_key_record.txt && openssl rsa -in secrets/private_key.pem -pubout -outform der | openssl base64 -A >> secrets/public_key_record.txt
 ```
 
-You should have `priv_key.pem`, `priv_key.txt`, and `pub_key_record.txt` now.
+You should have `private_key.pem`, `private_key.txt`, and `public_key_record.txt` inside `secrets` folder.
 
 Add `TXT` record to your domain with the following values:
 
-| Name                     | Value                               |
-| ------------------------ | ----------------------------------- |
-| mailchannels.\_domainkey | content of the `pub_key_record.txt` |
+| Type | Name                     | Value                                  |
+| ---- | ------------------------ | -------------------------------------- |
+| TXT  | mailchannels.\_domainkey | content of the `public_key_record.txt` |
 
-Update [DKIM_PRIVATE_KEY](#cloudflare-worker) with the content of the `priv_key.txt` for the environment variables in Cloudflare Worker.
+Update [DKIM_PRIVATE_KEY](#cloudflare-worker) with the content of the `private_key.txt` for the environment variables in Cloudflare Worker.
 
 ## Usage
 
