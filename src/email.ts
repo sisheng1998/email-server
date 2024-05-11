@@ -54,4 +54,11 @@ export const sendEmail = async (
       }
     }
   }
+
+  return {
+    success: false,
+    status: 400 as StatusCode,
+    message: 'Failed to send email',
+    body: null,
+  }
 }
