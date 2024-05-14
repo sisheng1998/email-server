@@ -189,7 +189,9 @@ When the `dryRun` is present and set to `true`, the email will not be sent.
 
 ## Development
 
-Copy `.dev.vars.example`, rename the new file to `.dev.vars`, and fill in the variables from [Cloudflare Worker](#cloudflare-worker)
+Copy `.dev.vars.example`, rename the new file to `.dev.vars`, and fill in the variables from [Cloudflare Worker](#cloudflare-worker).
+
+Run `npm install` command to install dependencies.
 
 Start a local server with `npm run dev`, the server will run at `http://localhost:8787`.
 
