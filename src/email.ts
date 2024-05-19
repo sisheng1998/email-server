@@ -2,6 +2,7 @@ import { StatusCode } from 'hono/utils/http-status'
 import { Bindings } from './types'
 import { Email } from './zod'
 import { getMCEmail } from './utils'
+import { log } from './logger'
 
 export const sendEmail = async (
   email: Email,
@@ -55,10 +56,16 @@ export const sendEmail = async (
     }
   }
 
+  const message = `Failed to send email after ${attempt} attempt${
+    attempt === 1 ? '' : 's'
+  }`
+
+  log.error(message)
+
   return {
     success: false,
     status: 400 as StatusCode,
-    message: 'Failed to send email',
+    message: message,
     body: null,
   }
 }
