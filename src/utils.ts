@@ -8,6 +8,10 @@ import {
 import { Contact, Email } from './zod'
 
 export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
+  const headers = {
+    'X-Entity-Ref-ID': generateRandomId(),
+  }
+
   const to = getMCContacts(email.to)
   const from = getMCContact(email.from)
 
@@ -60,6 +64,7 @@ export const getMCEmail = (email: Email, env: Bindings): MCEmail => {
   const content: MCContent[] = [...textContent, ...htmlContent]
 
   return {
+    headers,
     personalizations,
     from,
     reply_to,
@@ -86,4 +91,18 @@ const getMCContact = (contact: Contact): MCContact => {
   }
 
   return { email: contact.email, name: contact.name }
+}
+
+const characters =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+
+const generateRandomId = (length: number = 16): string => {
+  let result = ''
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length)
+    result += characters.charAt(randomIndex)
+  }
+
+  return result
 }

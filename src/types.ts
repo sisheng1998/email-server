@@ -20,6 +20,7 @@ export type MCPersonalization = {
 }
 
 export type MCEmail = {
+  headers: Record<string, string>
   personalizations: MCPersonalization[]
   from: MCContact
   reply_to?: MCContact
