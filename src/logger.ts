@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { MiddlewareHandler } from 'hono/types'
 import { getPath } from 'hono/utils/url'
 
@@ -35,6 +37,20 @@ const logMessage: LogFunction = (message, ...messages) => {
   )}) ${message.trim()} ${messages.map((m) => m.trim()).join(' ')}`
 
   console.log(logEntry)
+
+  const logFolder = path.join(process.cwd(), 'logs')
+
+  if (!fs.existsSync(logFolder)) {
+    fs.mkdirSync(logFolder)
+  }
+
+  const filename = getCurrentDate(timestamp)
+
+  fs.appendFile(
+    path.join(logFolder, `${filename}.log`),
+    logEntry + '\n',
+    (error) => error && console.error('Failed to write log to file:', error)
+  )
 }
 
 const TIME_ZONE = 'Asia/Kuala_Lumpur'
@@ -60,6 +76,16 @@ const formatDate = (timestamp: string) => {
   const humanFriendlyTime = date.toLocaleTimeString('en-US', timeOptions)
 
   return `${humanFriendlyDate}, ${humanFriendlyTime}`
+}
+
+const getCurrentDate = (timestamp: string) => {
+  const date = new Date(timestamp)
+
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+
+  return `${year}-${month}-${day}`
 }
 
 export const logger = (): MiddlewareHandler => async (c, next) => {
