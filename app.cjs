@@ -2,7 +2,7 @@
 // To fix ERR_REQUIRE_ESM error in Node.js
 
 async function loadApp() {
-  await import('./dist/index.js')
+  await import("./dist/index.js");
 }
 
-loadApp()
+loadApp();
