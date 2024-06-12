@@ -1,6 +1,7 @@
 import { StatusCode } from "hono/utils/http-status";
 import { SendEmailType } from "@/schemas/sendEmail";
 import { getEmail } from "@/utils/sendEmail";
+import { ResponseType } from "@/types/response";
 import { log } from "@/utils/logger";
 
 // TODO: Replace MailChannels API with NodeMailer
@@ -9,7 +10,7 @@ export const sendEmail = async (
   data: SendEmailType,
   attempts: number = 3,
   delay: number = 1000
-) => {
+): Promise<ResponseType> => {
   const email = getEmail(data);
 
   // const url = `https://api.mailchannels.net/tx/v1/send${
@@ -62,12 +63,10 @@ export const sendEmail = async (
 
   // log.error(message);
 
-  const message = JSON.stringify(email);
-
   return {
     success: false,
     status: 400 as StatusCode,
-    message,
-    body: null,
+    message: "Failed to send email",
+    body: email,
   };
 };

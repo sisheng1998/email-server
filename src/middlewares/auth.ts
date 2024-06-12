@@ -1,10 +1,12 @@
 import { Context, MiddlewareHandler } from "hono";
 import { env } from "hono/adapter";
 import { ENV } from "@/types/env";
+import { HonoResponseType } from "@/types/response";
 import { log } from "@/utils/logger";
 
 export const authMiddleware =
-  (): MiddlewareHandler => async (c: Context, next) => {
+  (): MiddlewareHandler =>
+  async (c: Context, next): Promise<HonoResponseType | void> => {
     const { API_TOKEN } = env<ENV>(c);
 
     const token = c.req.header("Authorization")?.split("Bearer ")[1];
@@ -17,6 +19,7 @@ export const authMiddleware =
       return c.json(
         {
           success: false,
+          status: 500,
           message,
         },
         500
@@ -31,6 +34,7 @@ export const authMiddleware =
       return c.json(
         {
           success: false,
+          status: 401,
           message,
         },
         401
