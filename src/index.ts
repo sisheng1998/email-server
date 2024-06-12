@@ -4,10 +4,13 @@ import { serve } from "@hono/node-server";
 import "dotenv/config";
 import { authMiddleware } from "@/middlewares/auth";
 import { inputMiddleware } from "@/middlewares/input";
-import { logger } from "@/middlewares/logger";
-import { log } from "@/utils/logger";
+import { HonoResponseType } from "@/types/response";
 import { SendEmailType, sendEmailSchema } from "@/schemas/sendEmail";
 import { sendEmail } from "@/functions/sendEmail";
+import { VerifyEmailType, verifyEmailSchema } from "@/schemas/verifyEmail";
+import { verifyEmail } from "@/functions/verifyEmail";
+import { logger } from "@/middlewares/logger";
+import { log } from "@/utils/logger";
 
 const app = new Hono();
 
@@ -21,7 +24,7 @@ app.post(
   "/send",
   authMiddleware(),
   inputMiddleware(sendEmailSchema),
-  async (c) => {
+  async (c): Promise<HonoResponseType> => {
     const data: SendEmailType = await c.req.json();
 
     try {
@@ -38,6 +41,7 @@ app.post(
       return c.json(
         {
           success: false,
+          status: 400,
           message,
         },
         400
@@ -46,14 +50,47 @@ app.post(
   }
 );
 
-app.notFound((c) => c.json({ success: false, message: "Not found" }, 404));
+app.post(
+  "/verify",
+  authMiddleware(),
+  inputMiddleware(verifyEmailSchema),
+  async (c): Promise<HonoResponseType> => {
+    const data: VerifyEmailType = await c.req.json();
 
-app.onError((error, c) => {
+    try {
+      const response = await verifyEmail(data);
+      return c.json(response, response.status);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : error?.toString() || "Unknown error occurred";
+
+      log.error(message);
+
+      return c.json(
+        {
+          success: false,
+          status: 400,
+          message,
+        },
+        400
+      );
+    }
+  }
+);
+
+app.notFound(
+  (c): HonoResponseType =>
+    c.json({ success: false, status: 404, message: "Not found" }, 404)
+);
+
+app.onError((error, c): HonoResponseType => {
   const message = error.message || "Unknown error occurred";
 
   log.error(message);
 
-  return c.json({ success: false, message }, 500);
+  return c.json({ success: false, status: 500, message }, 500);
 });
 
 const port = Number(process.env.PORT || 8787);
