@@ -1,6 +1,5 @@
 import { z } from "zod";
-
-export const emailSchema = z.string().email();
+import { emailSchema } from "@/schemas/verifyEmail";
 
 const contactSchema = z.union([
   emailSchema,
