@@ -21,7 +21,7 @@ export const sendEmail = async (
       status: 200,
       message: dryRun ? "Email sent in dry run mode" : "Email sent",
       body: {
-        messageId: info.messageId,
+        ...info,
         ...(previewUrl && { previewUrl }),
       },
     };
