@@ -28,7 +28,7 @@ app.post(
     const data: SendEmailType = await c.req.json();
 
     try {
-      const response = await sendEmail(data);
+      const response = await sendEmail(data, c);
       return c.json(response, response.status);
     } catch (error) {
       const message =
@@ -41,10 +41,10 @@ app.post(
       return c.json(
         {
           success: false,
-          status: 400,
+          status: 500,
           message,
         },
-        400
+        500
       );
     }
   }
@@ -71,10 +71,10 @@ app.post(
       return c.json(
         {
           success: false,
-          status: 400,
+          status: 500,
           message,
         },
-        400
+        500
       );
     }
   }
