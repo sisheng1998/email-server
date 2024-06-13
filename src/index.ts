@@ -41,10 +41,10 @@ app.post(
       return c.json(
         {
           success: false,
-          status: 500,
+          status: 400,
           message,
         },
-        500
+        400
       );
     }
   }
@@ -71,10 +71,10 @@ app.post(
       return c.json(
         {
           success: false,
-          status: 500,
+          status: 400,
           message,
         },
-        500
+        400
       );
     }
   }
