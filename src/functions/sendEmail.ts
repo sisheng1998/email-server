@@ -1,72 +1,31 @@
-import { StatusCode } from "hono/utils/http-status";
+import { Context } from "hono";
 import { SendEmailType } from "@/schemas/sendEmail";
-import { getEmail } from "@/utils/sendEmail";
+import { getEmail, getPreviewUrl, getTransporter } from "@/utils/sendEmail";
 import { ResponseType } from "@/types/response";
-import { log } from "@/utils/logger";
-
-// TODO: Replace MailChannels API with NodeMailer
 
 export const sendEmail = async (
   data: SendEmailType,
-  attempts: number = 3,
-  delay: number = 1000
+  c: Context
 ): Promise<ResponseType> => {
   const email = getEmail(data);
+  const dryRun = data.dryRun;
 
-  // const url = `https://api.mailchannels.net/tx/v1/send${
-  //   data.dryRun ? "?dry-run=true" : ""
-  // }`;
+  try {
+    const transporter = await getTransporter({ c, dryRun });
 
-  // const options = {
-  //   method: "POST",
-  //   headers: {
-  //     "content-type": "application/json",
-  //   },
-  //   body: JSON.stringify(email),
-  // };
+    const info = await transporter.sendMail(email);
+    const previewUrl = dryRun ? getPreviewUrl(info) : false;
 
-  // let attempt = 0;
-
-  // while (attempt < attempts) {
-  //   const response = await fetch(url, options);
-
-  //   if (response.ok) {
-  //     const body = await response.json();
-
-  //     return {
-  //       success: true,
-  //       status: response.status as StatusCode,
-  //       message: response.statusText,
-  //       body,
-  //     };
-  //   }
-
-  //   attempt++;
-
-  //   if (attempt < attempts) {
-  //     await new Promise((resolve) => setTimeout(resolve, delay));
-  //   } else {
-  //     const body = await response.text();
-
-  //     return {
-  //       success: false,
-  //       status: response.status as StatusCode,
-  //       message: response.statusText,
-  //       body,
-  //     };
-  //   }
-  // }
-
-  // const message = `Failed to send email after ${attempt} attempt${
-  //   attempt === 1 ? "" : "s"
-  // }`;
-
-  // log.error(message);
-
-  return {
-    success: false,
-    status: 400 as StatusCode,
-    message: "Failed to send email",
-    body: email,
-  };
+    return {
+      success: true,
+      status: 200,
+      message: dryRun ? "Email sent in dry run mode" : "Email sent",
+      body: {
+        messageId: info.messageId,
+        ...(previewUrl && { previewUrl }),
+      },
+    };
+  } catch (error) {
+    throw error;
+  }
 };
