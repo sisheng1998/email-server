@@ -1,4 +1,3 @@
-import { StatusCode } from "hono/utils/http-status";
 import { VerifyEmailType } from "@/schemas/verifyEmail";
 import { VerificationResult } from "@/types/verifyEmail";
 import { ResponseType } from "@/types/response";
@@ -8,7 +7,6 @@ import {
   testInbox,
   validateEmailFormat,
 } from "@/utils/verifyEmail";
-import { log } from "@/utils/logger";
 
 export const verifyEmail = async (
   data: VerifyEmailType
@@ -31,7 +29,7 @@ export const verifyEmail = async (
     if (!isEmailValid)
       return {
         success: true,
-        status: 200 as StatusCode,
+        status: 200,
         message: "Verification completed",
         body,
       };
@@ -47,7 +45,7 @@ export const verifyEmail = async (
     if (mxRecords.length === 0)
       return {
         success: true,
-        status: 200 as StatusCode,
+        status: 200,
         message: "Verification completed",
         body,
       };
@@ -71,36 +69,17 @@ export const verifyEmail = async (
 
         index++;
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : error?.toString() || "Unknown error occurred";
-
-        log.error(message);
-
-        break;
+        throw error;
       }
     }
 
     return {
       success: true,
-      status: 200 as StatusCode,
+      status: 200,
       message: "Verification completed",
       body,
     };
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : error?.toString() || "Unknown error occurred";
-
-    log.error(message);
-
-    return {
-      success: false,
-      status: 400 as StatusCode,
-      message,
-      body,
-    };
+    throw error;
   }
 };
