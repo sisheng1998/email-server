@@ -1,80 +1,12 @@
 # Email Server
 
-Powered by Cloudflare Workers and MailChannels
+Send & verify email with NodeJS.
 
-## Environment Variables
+## Usage - Send Email
 
-### Github Actions
+Send email by making a `POST` request to the server on the `/send` endpoint with the following parameters:
 
-Add these to `Repository secrets` under `Settings` > `Secrets and variables` > `Actions`
-
-- `CLOUDFLARE_API_TOKEN` -> Cloudflare API token which has permissions for Cloudflare Worker
-- `CLOUDFLARE_ACCOUNT_ID` -> Your Cloudflare Account ID
-
-Once these are added, the `deploy` Github action workflow will run and deploy the email server on Cloudflare Worker automatically when the `main` branch updated.
-
-### Cloudflare Worker
-
-- `API_TOKEN` - Random token that will be used in the "Authorization" header to make authenticated calls to your email server.
-- `DKIM_PRIVATE_KEY` - DKIM private key generated in [DKIM Record](#dkim-record)
-
-For `API_TOKEN`, use `openssl rand -base64 32` command in Linux/MacOS to generate random tokens quickly.
-
-## Setup DNS Records
-
-### SPF Record
-
-Add `TXT` record to your domain with the following values:
-
-| Type | Name | Value                                           |
-| ---- | ---- | ----------------------------------------------- |
-| TXT  | @    | v=spf1 a mx include:relay.mailchannels.net ~all |
-
-If you already have a SPF record added for your domain, note that you cannot add another `TXT` record for spf. In such cases merge the existing SPF record with mailchannels.
-
-For example, your current SPF record is `v=spf1 include:zoho.in ~all` then append the `include:relay.mailchannels.net` to the same value.
-
-So the new record value will be `v=spf1 include:zoho.in include:relay.mailchannels.net ~all`.
-
-### Domain Lockdown
-
-Add `TXT` record to your domain with the following values:
-
-| Type | Name           | Value                        |
-| ---- | -------------- | ---------------------------- |
-| TXT  | \_mailchannels | v=mc1 cfid=xxxxx.workers.dev |
-
-Replace `xxxxx` with your workers subdomain which you can find on the `Workers & Pages` section of Cloudflare.
-
-### DKIM Record
-
-Generate private key as PEM file and base64 encoded txt file:
-
-```sh
-mkdir -p secrets && openssl genrsa 2048 | tee secrets/private_key.pem | openssl rsa -outform der | openssl base64 -A > secrets/private_key.txt
-```
-
-Generate public key for DNS record:
-
-```sh
-echo -n "v=DKIM1;p=" > secrets/public_key_record.txt && openssl rsa -in secrets/private_key.pem -pubout -outform der | openssl base64 -A >> secrets/public_key_record.txt
-```
-
-You should have `private_key.pem`, `private_key.txt`, and `public_key_record.txt` inside `secrets` folder.
-
-Add `TXT` record to your domain with the following values:
-
-| Type | Name                     | Value                                  |
-| ---- | ------------------------ | -------------------------------------- |
-| TXT  | mailchannels.\_domainkey | content of the `public_key_record.txt` |
-
-Update [DKIM_PRIVATE_KEY](#cloudflare-worker) with the content of the `private_key.txt` for the environment variables in Cloudflare Worker.
-
-## Usage
-
-Send emails by making a `POST` request to the worker on the `/send` endpoint with the following parameters:
-
-You need to pass an `Authorization` header with the [authorization token](#cloudflare-worker). Like the following: `Authorization: Bearer {API_TOKEN}`
+You need to pass an `Authorization` header with the [authorization token](#environment-variables). Like the following: `Authorization: Bearer {API_TOKEN}`
 
 ### Basic Email
 
@@ -187,18 +119,107 @@ To test the function without sending the email, add `dryRun` parameter to the re
 
 When the `dryRun` is present and set to `true`, the email will not be sent.
 
+### Email Headers
+
+For custom email headers, add `headers` parameter to the request.
+
+```json
+{
+  "headers": {
+    "X-My-Key": "header value",
+    "X-Another-Key": "another value"
+  },
+  "to": "john@example.com",
+  "from": "me@example.com",
+  "subject": "Hello World",
+  "text": "Hello World"
+}
+```
+
+## Usage - Verify Email
+
+Verify email by making a `POST` request to the server on the `/verify` endpoint with the following parameters:
+
+You need to pass an `Authorization` header with the [authorization token](#environment-variables). Like the following: `Authorization: Bearer {API_TOKEN}`
+
+### Request
+
+The request should look like this:
+
+```json
+{
+  "email": "john@example.com"
+}
+```
+
+### Response
+
+If everything is correct, the response should look like this:
+
+```json
+{
+  "success": true,
+  "result": {
+    "email": "john@example.com",
+    "isEmailValid": true,
+    "isDisposable": false,
+    "isMxRecordFound": true,
+    "isSMTPConnected": true,
+    "isEmailExist": true,
+    "isCatchAll": true
+  }
+}
+```
+
+### Result
+
+- `email` - email that you send in request body.
+- `isEmailValid` - check if the format of the email is valid.
+- `isDisposable` - check if the email is disposable / temporary.
+- `isMxRecordFound` - check if the email has at least 1 mail exchange (MX) record.
+- `isSMTPConnected` - check if the SMTP server can be connected.
+- `isEmailExist` - check if the email exists.
+- `isCatchAll` - check if the email is catch-all.
+
+For `isSMTPConnected`, some server might block port 25, thus the server will be timeout in 3 seconds and return as `false`.
+
+## Environment Variables
+
+- `API_TOKEN` - Random token that will be used in the "Authorization" header to make authenticated calls to your email server.
+- `SMTP_HOST` - The hostname or IP address of the SMTP server.
+- `SMTP_USERNAME` - The username for authenticating with the SMTP server.
+- `SMTP_PASSWORD` - The password for authenticating with the SMTP server.
+
+For `API_TOKEN`, use `openssl rand -base64 32` command in Linux/MacOS to generate random tokens.
+
 ## Development
 
-Copy `.dev.vars.example`, rename the new file to `.dev.vars`, and fill in the variables from [Cloudflare Worker](#cloudflare-worker).
+Copy `.env.example`, rename the new file to `.env`, and fill in the variables from [Environment Variables](#environment-variables).
 
 Run `npm install` command to install dependencies.
 
 Start a local server with `npm run dev`, the server will run at `http://localhost:8787`.
 
-Note: Email will not be sent with local server as MailChannels only accept the request that sent from Cloudflare workers.
+### Disposable Email Blocklist
+
+To update the disposable email blocklist, add new domain(s) in `disposable_email_blocklist.conf` under `/scripts` folder.
+
+Run `npm run populate:disposable-email` command, `disposableEmailList.ts` under `/src/constants` folder will be updated.
+
+## Deployment
+
+Run `npm run build` command, all TypeScript files under `/src` folder will build into JavaScript files under `/dist` folder.
+
+Start a local server with `npm run start`, the server will run at `http://localhost:8787` using `/dist/index.js` as entry point.
+
+### Debug
+
+Error `ERR_REQUIRE_ESM` might appear if the NodeJS server under CommonJS environment.
+
+To fix the error, use `app.cjs` file as entry point to run the server, it should be placed same level as the `/dist` folder.
 
 ## Technology Stack
 
 - TypeScript
 - Hono
-- Cloudflare Workers
+- NodeJS
