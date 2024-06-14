@@ -98,7 +98,9 @@ const getContact = (
 ): NonNullable<SendMailOptions["from"]> =>
   typeof contact === "string"
     ? contact
-    : { address: contact.email, name: contact.name };
+    : contact.name
+    ? { address: contact.email, name: contact.name }
+    : contact.email;
 
 const characters =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

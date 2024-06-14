@@ -5,7 +5,7 @@ const contactSchema = z.union([
   emailSchema,
   z.object({
     email: emailSchema,
-    name: z.string(),
+    name: z.string().optional(),
   }),
 ]);
 
