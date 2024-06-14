@@ -216,7 +216,7 @@ Start a local server with `npm run start`, the server will run at `http://localh
 
 Error `ERR_REQUIRE_ESM` might appear if the NodeJS server under CommonJS environment.
 
-To fix the error, use `app.cjs` file as entry point to run the server, it should be placed same level as the `/dist` folder.
+To fix the error, use `app.cjs` file as entry point to run the server, it should be under `/dist` folder after `npm run build`.
 
 ## Technology Stack
 
